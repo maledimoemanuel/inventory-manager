@@ -54,7 +54,7 @@ const Dashboard = () => {
         </div>
         <div className="stat-card">
           <h3>Revenue</h3>
-          <p>R33{/*revenue.toLocaleString()*/}</p>
+          <p>R963{/*revenue.toLocaleString()*/}</p>
         </div>
       </div>
     </div>

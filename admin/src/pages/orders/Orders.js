@@ -3,9 +3,9 @@ import "./orders.css";
 
 const Orders = () => {
   const orders = [
-    { id: 1, customer: "John Doe", amount: "$250", status: "Pending" },
-    { id: 2, customer: "Jane Smith", amount: "$120", status: "Shipped" },
-    { id: 3, customer: "Michael Brown", amount: "$320", status: "Delivered" },
+    { id: 1, customer: "John Doe", amount: "R250", status: "Pending" },
+    { id: 2, customer: "Jane Smith", amount: "R120", status: "Shipped" },
+    { id: 3, customer: "Michael Brown", amount: "R320", status: "Delivered" },
   ];
 
   return (
