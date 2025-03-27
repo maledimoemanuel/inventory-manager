@@ -61,20 +61,30 @@ app.post("/admin/add-products", (req, res) => {
   });
 
 // Update a product
-app.put("/update-product/:id", (req, res) => {
-  const { id } = req.params; 
-  const { name, description, price, stock } = req.body; 
+app.put("/admin/update-product/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, description, price, category } = req.body;
 
-  if (!name || !description || typeof price !== "number" || typeof stock !== "number") {
+  console.log("Incoming Data:", { id, name, description, price, category });
+
+  // Validate the ID
+  if (isNaN(parseInt(id, 10))) {
+    return res.status(400).json({ error: "Invalid product ID" });
+  }
+
+  const parsedPrice = parseFloat(price);
+
+  if (!name || !description || !category || isNaN(parsedPrice)) {
+    console.log("Validation failed:", { name, description, price, category });
     return res.status(400).json({ error: "Invalid input data" });
   }
 
-  const query = "UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE id = ?";
+  const query = "UPDATE products SET name = ?, description = ?, price = ?, category = ? WHERE product_id = ?";
 
-  db.query(query, [name, description, price, stock, id], (err, result) => {
+  db.query(query, [name, description, parsedPrice, category, id], (err, result) => {
     if (err) {
       console.error("Update error:", err);
-      return res.status(500).json({ error: "Failed to update product" });
+      return res.status(500).json({ error: "Failed to update product", details: err.message });
     }
 
     if (result.affectedRows === 0) {
@@ -84,10 +94,9 @@ app.put("/update-product/:id", (req, res) => {
     res.json({ message: "Product updated successfully" });
   });
 });
-
   
 // Delete a product
-app.delete("/delete-product/:id", (req, res) => {
+app.delete("/admin/delete-product/:id", (req, res) => {
   const { id } = req.params;
 
   const query = "DELETE FROM products WHERE id = ?";
