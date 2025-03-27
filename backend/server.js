@@ -121,3 +121,88 @@ app.delete("/admin/delete-product/:id", (req, res) => {
     res.json({ message: "Product deleted successfully" });
   });
 });
+//add stock
+app.post("/admin/add-stock", (req, res) => {
+  const { product_id, quantity, threshold } = req.body;
+
+  if (!product_id || !quantity || !threshold) {
+    return res.status(400).json({ error: "Invalid input data" });
+  }
+
+  const query = "INSERT INTO stock (product_id, quantity, threshold) VALUES (?, ?, ?)";
+  db.query(query, [product_id, quantity, threshold], (err, result) => {
+    if (err) {
+      console.error("Stock insert error:", err);
+      return res.status(500).json({ error: "Failed to add stock" });
+    }
+    res.status(201).json({ message: "Stock added", stockId: result.insertId });
+  });
+});
+
+//get stock
+app.get("/admin/stock", (req, res) => {
+  const query = "SELECT p.name, s.quantity, s.threshold FROM stock s JOIN products p ON s.product_id = p.product_id";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Stock fetch error:", err);
+      return res.status(500).json({ error: "Failed to fetch stock" });
+    }
+    res.json(results);
+  });
+});
+
+//stock alerts
+app.get("/admin/stock-alerts", (req, res) => {
+  const query = "SELECT p.name, s.quantity FROM stock s JOIN products p ON s.product_id = p.product_id WHERE s.quantity <= s.threshold";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Stock alert error:", err);
+      return res.status(500).json({ error: "Failed to fetch stock alerts" });
+    }
+    res.json(results);
+  });
+});
+//add into sales
+app.post("/admin/add-sale", (req, res) => {
+  const { product_id, quantity_sold } = req.body;
+
+  if (!product_id || !quantity_sold) {
+    return res.status(400).json({ error: "Invalid input data" });
+  }
+
+  const query = "INSERT INTO sales (product_id, quantity_sold) VALUES (?, ?)";
+  db.query(query, [product_id, quantity_sold], (err, result) => {
+    if (err) {
+      console.error("Sale insert error:", err);
+      return res.status(500).json({ error: "Failed to record sale" });
+    }
+
+    // Reduce stock
+    const updateStock = "UPDATE stock SET quantity = quantity - ? WHERE product_id = ?";
+    db.query(updateStock, [quantity_sold, product_id], (err, updateResult) => {
+      if (err) {
+        console.error("Stock update error:", err);
+        return res.status(500).json({ error: "Failed to update stock" });
+      }
+      res.status(201).json({ message: "Sale recorded successfully" });
+    });
+  });
+});
+
+app.get("/admin/sales-report", (req, res) => {
+  const query = `
+    SELECT p.name, SUM(s.quantity_sold) AS total_sold
+    FROM sales s
+    JOIN products p ON s.product_id = p.product_id
+    WHERE s.sale_date >= NOW() - INTERVAL 30 DAY
+    GROUP BY p.name
+  `;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Sales report error:", err);
+      return res.status(500).json({ error: "Failed to fetch sales report" });
+    }
+    res.json(results);
+  });
+});
+
