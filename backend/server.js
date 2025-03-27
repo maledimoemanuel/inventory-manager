@@ -99,12 +99,19 @@ app.put("/admin/update-product/:id", (req, res) => {
 app.delete("/admin/delete-product/:id", (req, res) => {
   const { id } = req.params;
 
-  const query = "DELETE FROM products WHERE id = ?";
+  console.log("Incoming Product ID for Deletion:", id);
+
+  // Validate the product_id
+  if (isNaN(parseInt(id, 10))) {
+    return res.status(400).json({ error: "Invalid product ID" });
+  }
+
+  const query = "DELETE FROM products WHERE product_id = ?";
 
   db.query(query, [id], (err, result) => {
     if (err) {
       console.error("Delete error:", err);
-      return res.status(500).json({ error: "Failed to delete product" });
+      return res.status(500).json({ error: "Failed to delete product", details: err.message });
     }
 
     if (result.affectedRows === 0) {
