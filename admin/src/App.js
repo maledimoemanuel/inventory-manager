@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/dashboard/Dashboad";
 import Inventory from "./pages/inventory/Inventory";
+import Stock from "./pages/stock/Stock";
 import Orders from "./pages/orders/Orders"
 import Settings from "./pages/settings/Settings";
 import Notifications from "./pages/notifications/Notifications";
@@ -24,6 +25,14 @@ function App() {
           element={
             <AdminLayout>
               <Inventory />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/stock"
+          element={
+            <AdminLayout>
+              <Stock />
             </AdminLayout>
           }
         />

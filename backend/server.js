@@ -121,6 +121,7 @@ app.delete("/admin/delete-product/:id", (req, res) => {
     res.json({ message: "Product deleted successfully" });
   });
 });
+
 //add stock
 app.post("/admin/add-stock", (req, res) => {
   const { product_id, quantity, threshold } = req.body;
@@ -150,6 +151,50 @@ app.get("/admin/stock", (req, res) => {
     res.json(results);
   });
 });
+
+//update stock
+app.put("/admin/update-stock/:id", (req, res) => {
+  const { id } = req.params;
+  const { quantity, threshold } = req.body;
+
+  if (!quantity || !threshold) {
+    return res.status(400).json({ error: "Invalid input data" });
+  }
+
+  const query = "UPDATE stock SET quantity = ?, threshold = ? WHERE stock_id = ?";
+  db.query(query, [quantity, threshold, id], (err, result) => {
+    if (err) {
+      console.error("Stock update error:", err);
+      return res.status(500).json({ error: "Failed to update stock" });
+    }
+    res.json({ message: "Stock updated successfully" });
+  });
+});
+//delete stock
+
+app.delete("/admin/delete-stock/:id", (req, res) => {
+  const { id } = req.params;
+
+  // Validate the stock_id
+  if (isNaN(parseInt(id, 10))) {
+    return res.status(400).json({ error: "Invalid stock ID" });
+  }
+
+  const query = "DELETE FROM stock WHERE stock_id = ?";
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Delete error:", err);
+      return res.status(500).json({ error: "Failed to delete stock", details: err.message });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Stock not found" });
+    }
+
+    res.json({ message: "Stock deleted successfully" });
+  });
+})
 
 //stock alerts
 app.get("/admin/stock-alerts", (req, res) => {
