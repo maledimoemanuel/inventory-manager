@@ -1,0 +1,16 @@
+.settings {
+    padding: 20px;
+  }
+  
+  .settings-options div {
+    margin: 10px 0;
+  }
+  
+  button {
+    background: #2980b9;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+  }
+  
