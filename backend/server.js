@@ -101,7 +101,6 @@ app.delete("/admin/delete-product/:id", (req, res) => {
 
   console.log("Incoming Product ID for Deletion:", id);
 
-  // Validate the product_id
   if (isNaN(parseInt(id, 10))) {
     return res.status(400).json({ error: "Invalid product ID" });
   }
@@ -122,22 +121,37 @@ app.delete("/admin/delete-product/:id", (req, res) => {
   });
 });
 
+/*
+CREATE TABLE inventory.stock (
+  stock_id SERIAL PRIMARY KEY,
+  product_id INT NOT NULL,
+  quantity INT NOT NULL,
+  threshold INT NOT NULL,
+  FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+CREATE TABLE inventory.products (
+  product_id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  price DECIMAL(10, 2)
+);
+*/
+
 //add stock
-app.post("/admin/add-stock", (req, res) => {
+app.post('/admin/add-stock', async (req, res) => {
   const { product_id, quantity, threshold } = req.body;
 
-  if (!product_id || !quantity || !threshold) {
-    return res.status(400).json({ error: "Invalid input data" });
+  // Check if product exists
+  const product = await db.query('SELECT * FROM products WHERE product_id = $1', [product_id]);
+  if (!product.rows.length) {
+    return res.status(400).json({ error: 'Invalid product ID' });
   }
 
-  const query = "INSERT INTO stock (product_id, quantity, threshold) VALUES (?, ?, ?)";
-  db.query(query, [product_id, quantity, threshold], (err, result) => {
-    if (err) {
-      console.error("Stock insert error:", err);
-      return res.status(500).json({ error: "Failed to add stock" });
-    }
-    res.status(201).json({ message: "Stock added", stockId: result.insertId });
-  });
+  await db.query(
+    'INSERT INTO stock (product_id, quantity, threshold) VALUES ($1, $2, $3)',
+    [product_id, quantity, threshold]
+  );
+  res.status(201).json({ message: 'Stock added successfully' });
 });
 
 //get stock

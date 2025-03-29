@@ -3,6 +3,7 @@ import "./stock.css";
 
 function Stock() {
   const [stock, setStock] = useState([]);
+  const [products, setProducts] = useState([]);
   const [newStock, setNewStock] = useState({
     product_id: "",
     quantity: "",
@@ -28,6 +29,25 @@ function Stock() {
     };
 
     fetchStock();
+  }, []);
+
+  // Fetch product data
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/admin/products");
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error("Failed to fetch products");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // Handle input changes
@@ -129,14 +149,20 @@ function Stock() {
       {/* Add/Edit Stock Form */}
       <div className="stock-form">
         <h2>{isEditing ? "Edit Stock" : "Add Stock"}</h2>
-        <label>Product ID:</label>
-        <input
-          type="text"
+        <label>Product:</label>
+        <select
           name="product_id"
           value={newStock.product_id}
           onChange={handleInputChange}
           disabled={isEditing}
-        />
+        >
+          <option value="">Select Product</option>
+          {products.map((product) => (
+            <option key={product.product_id} value={product.product_id}>
+              {product.name}
+            </option>
+          ))}
+        </select>
         <label>Quantity:</label>
         <input
           type="number"
