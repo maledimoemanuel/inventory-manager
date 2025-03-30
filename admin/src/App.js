@@ -45,6 +45,14 @@ function App() {
           }
         />
         <Route
+          path="/admin/notifications"
+          element={
+            <AdminLayout>
+              <Notifications />
+            </AdminLayout>
+          }
+        />
+        <Route
           path="/admin/settings"
           element={
             <AdminLayout>
